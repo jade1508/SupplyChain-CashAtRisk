@@ -287,12 +287,64 @@ RETURN Line1 & " " & Line2 & Line3
 Query for step 2:
 
 ```sql
-SELECT product_id, description, distribution_center, abc_class, days_of_cover,
-       margin_at_risk, suggested_order_qty, order_deadline_date, total_cash_at_risk
-FROM `inventory_risk_us.fct_risk_scoring`
-WHERE risk_status IN ('CRITICAL_STOCKOUT', 'REORDER_NOW', 'REORDER_SOON')
-ORDER BY severity_rank, total_cash_at_risk DESC
-LIMIT 25;
+WITH ranked AS (
+  SELECT product_id, description, distribution_center, abc_class, days_of_cover,
+         margin_at_risk, suggested_order_qty, order_deadline_date, 
+         CASE
+            WHEN risk_status = 'REORDER_SOON'
+                AND DATE(order_deadline_date) < CURRENT_DATE() THEN 'REORDER_NOW'
+            ELSE risk_status
+            END AS display_status, total_cash_at_risk,
+         ROW_NUMBER() OVER (ORDER BY severity_rank, total_cash_at_risk DESC) AS rn
+  FROM `inventory_risk_us.fct_risk_scoring`
+  WHERE risk_status IN ('CRITICAL_STOCKOUT', 'REORDER_NOW', 'REORDER_SOON')
+),
+top25 AS (SELECT * FROM ranked WHERE rn <= 25),
+aggregated_data AS (
+  SELECT
+    ROUND(SUM(margin_at_risk), 2)                      AS total_margin_risk,
+    COUNTIF(display_status = 'CRITICAL_STOCKOUT')         AS critical_count,
+    COUNTIF(display_status = 'REORDER_NOW')               AS reorder_now_count,
+    COUNTIF(display_status = 'REORDER_SOON')              AS reorder_soon_count,
+    STRING_AGG(
+      CONCAT(
+        '<tr>',
+        '<td><b>', CAST(product_id AS STRING), '</b></td>',
+        '<td>', REPLACE(REPLACE(REPLACE(COALESCE(description, ''), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'), '</td>',
+        '<td class="c">', COALESCE(distribution_center, ''), '</td>',
+        '<td class="c"><span class="', 
+           CASE display_status WHEN 'CRITICAL_STOCKOUT' THEN 'crit' WHEN 'REORDER_NOW' THEN 'now' ELSE 'soon' END, '">',
+           CASE display_status WHEN 'CRITICAL_STOCKOUT' THEN 'CRITICAL' WHEN 'REORDER_NOW' THEN 'NOW' ELSE 'SOON' END,
+        '</span></td>',
+        '<td class="c">', COALESCE(abc_class, ''), '</td>',
+        '<td class="r">', FORMAT('%.1f', IFNULL(days_of_cover, 0)), '</td>',
+        '<td class="r money">', FORMAT('$%.2f', IFNULL(margin_at_risk, 0)), '</td>',
+        '<td class="r">', COALESCE(CAST(NULLIF(suggested_order_qty, 0) AS STRING), '–'), '</td>',
+        '<td class="c nowrap', CASE WHEN order_deadline_date < CURRENT_DATE() THEN ' overdue' ELSE '' END, '">',
+        CAST(order_deadline_date AS STRING), 
+        CASE WHEN order_deadline_date < CURRENT_DATE() THEN '<br><small style="color:#c53030;">(Overdue)</small>' ELSE '' END,
+        '</td>'
+                '</tr>'
+      ),
+      '' ORDER BY rn
+    ) AS html_table_rows
+  FROM top25
+)
+SELECT 
+  a.total_margin_risk,
+  a.critical_count,
+  a.reorder_now_count,
+  a.reorder_soon_count,
+  a.html_table_rows,
+  (
+    SELECT TO_JSON_STRING(ARRAY_AGG(STRUCT(
+      product_id, description, distribution_center, abc_class, 
+      days_of_cover, margin_at_risk, suggested_order_qty, 
+      order_deadline_date, display_status
+    ) ORDER BY rn))
+    FROM top25
+  ) AS json_rows
+FROM aggregated_data a
 ```
 
 Email table fields: `product_id`, `description`, `days_of_cover`, `margin_at_risk`, `suggested_order_qty`, `order_deadline_date`.
