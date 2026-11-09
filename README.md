@@ -11,7 +11,7 @@
 
 1. **Quantifies working-capital risk on both sides of inventory:** cash buried in excess stock *and* margin at risk from potential stockouts.
 2. **Turns it into a ranked action list:** which products to reorder, how many units, the deadline to order, and which products will reach their reorder point within 14 days.
-3. **Delivers a plain-language briefing to Slack and email every weekday at 07:00**, so nobody has to open a dashboard to find out what needs attention.
+3. **Delivers a plain-language briefing to email and Slack every weekday at 07:00**, so nobody has to open a dashboard to find out what needs attention.
 
 **Built with:** Google BigQuery (SQL) · Power BI (DAX) · Make.com · OpenAI API · GitHub
 
