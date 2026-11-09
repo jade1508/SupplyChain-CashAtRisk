@@ -1,4 +1,4 @@
-<img width="1440" height="807" alt="image" src="https://github.com/user-attachments/assets/f7f0bc2a-68c3-4c63-9162-c77bc2e8b1c9" /># 📦 Supply Chain Inventory & Cash-at-Risk Early-Warning System
+# 📦 Supply Chain Inventory & Cash-at-Risk Early-Warning System
 
 > **Most inventory dashboards tell you what already happened. This one shows where your cash is buried, which products to reorder, and by when.**
 
