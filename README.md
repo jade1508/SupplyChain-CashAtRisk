@@ -1,4 +1,4 @@
-# 📦 Supply Chain Inventory & Cash-at-Risk Early-Warning System
+<img width="1440" height="807" alt="image" src="https://github.com/user-attachments/assets/f7f0bc2a-68c3-4c63-9162-c77bc2e8b1c9" /># 📦 Supply Chain Inventory & Cash-at-Risk Early-Warning System
 
 > **Most inventory dashboards tell you what already happened. This one shows where your cash is buried, which products to reorder, and by when.**
 
@@ -26,7 +26,7 @@ Inventory misallocation is costly in two opposite directions:
 | **Understocking (stockouts)** | Lost margin, lost customers, lost momentum in peak periods |
 | **Overstocking (dead stock)** | Capital stuck in the warehouse, holding costs, future markdown losses |
 
-Most operational dashboards stop at unit counts ("12 SKUs below reorder point"). This project evaluates inventory through a **working-capital lens** and tracks the two sides separately, because they live on different scales:
+Most operational dashboards stop at unit counts ("4 SKUs below reorder point"). This project evaluates inventory through a **working-capital lens** and tracks the two sides separately, because they live on different scales:
 
 - **Cash buried** (a stock): value at cost of units beyond 90 days of projected demand.
 - **Margin at risk** (a flow): expected margin lost to stockouts per replenishment cycle.
@@ -146,10 +146,9 @@ These cutoffs are widely used **conventions, not universal standards**; sources 
 
 ### Screenshots
 
-{{FILL: add the three screenshots, then delete this line
-![Page 1: Executive Cash-at-Risk](dashboard/page1_executive.png)
-![Page 2: Stockout Watchlist](dashboard/page2_watchlist.png)
-![Page 3: Dead Stock & Aging](dashboard/page3_dead_stock.png)}}
+<img width="1443" height="809" alt="image" src="https://github.com/user-attachments/assets/a27e551b-aac9-49a2-8bf5-5549694b5fa4" />
+<img width="1444" height="809" alt="image" src="https://github.com/user-attachments/assets/f6ec14d1-2c27-49c4-a615-a6f048cd8c2c" />
+<img width="1440" height="807" alt="image" src="https://github.com/user-attachments/assets/b4420378-ef5b-48d4-b445-3fe1135c6ee2" />
 
 ### Data model
 
