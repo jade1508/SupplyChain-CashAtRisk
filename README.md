@@ -163,16 +163,16 @@ Tables loaded (BigQuery connector, Import mode): `fct_risk_scoring`, `dim_produc
 
 - **Executive headline banner** (DAX, see below): one sentence combining cash buried, overdue and soon-due reorders, and the break-even markdown.
 - **KPI cards:** Cash Buried % Inventory · Cash Buried · Total Inventory Value · Weighted Days of Cover · Products Needing Order. Margin at risk lives on the Stockout Watchlist page, next to the products it applies to.
-- **Scatter, by category and ABC class:** one bubble per category and ABC class. X = weighted days of cover, Y = inventory value, bubble size = cash buried, colour = ABC class. Aggregated on purpose: at product level the $8.8M is spread over 29k products averaging about $300 each, which gives a dense, unreadable cloud (the product-level view lives in the watchlist and Top 10 tables). X excludes products with no demand (days of cover capped at 9999), while Y includes them.
+- **Scatter, by category and ABC class:** one bubble per category and ABC class. X = weighted days of cover, Y = inventory value, bubble size = cash buried, colour = ABC class. Aggregated on purpose: at product level the $8.3M is spread over 29k products averaging about $300 each, which gives a dense, unreadable cloud (the product-level view lives in the watchlist and Top 10 tables). X excludes products with no demand (days of cover capped at 9999), while Y includes them.
 - **Column chart by distribution center:** cash buried. The share of inventory that is cash buried is about 93% in every distribution center, so a % line adds nothing and was dropped.
 - **Slicers:** date range, distribution center, category, brand, product id, ABC class, risk status.
 
 ### Page 2: Stockout Watchlist
 
-- **Page 2** filtered to `CRITICAL_STOCKOUT`, `REORDER_NOW` and `REORDER_SOON`. In the current run all 19 products in the first two tiers are already past their order deadline; `REORDER_SOON` rows have a deadline within the next 14 days (positive days to deadline).
+- **Page 2** filtered to `CRITICAL_STOCKOUT`, `REORDER_NOW` and `REORDER_SOON`. In the current run all 18 products in the first two tiers are already past their order deadline; `REORDER_SOON` rows have a deadline within the next 14 days (positive days to deadline).
 - **Cards:** critical products, reorder now, reorder soon, order value at cost, margin at risk (next replenishment cycle).
 - **Table** sorted by `severity_rank`, then `total_cash_at_risk` (descending). Columns: product, distribution center, ABC class, days of cover, on hand, reorder point, suggested order quantity, order deadline, days to deadline, margin at risk. Conditional formatting: days to deadline ≤ 0 red, ≤ 7 amber; data bars on margin at risk.
-- **Stock level vs reorder point (line chart, 90 days):** `fct_stock_history[day]` on the axis, on-hand units and reorder point as lines. Select a row in the table to see that product. The reorder point is today's value, so it is a flat line. The chart title is a DAX measure (`Fell Below ROP Label`): it asks for a product until a row is selected, then reads e.g. "Fell below ROP on 10 Sep", the day on-hand dropped below today's reorder point.
+- **Stock level vs reorder point (line chart, 90 days):** `fct_stock_history[day]` on the axis, on-hand units and reorder point as lines. Select a row in the table to see that product. The reorder point is today's value, so it is a flat line. The chart title is a DAX measure (`Fell Below ROP Label`): it asks for a product until a row is selected, then reads e.g. "Fell below ROP on 21 Sep", the day on-hand dropped below today's reorder point.
 
 ### Page 3: Dead Stock & Aging
 
@@ -185,44 +185,6 @@ Tables loaded (BigQuery connector, Import mode): `fct_risk_scoring`, `dim_produc
 ### Example DAX measures
 
 ```dax
-Total Cash at Risk       = SUM(fct_risk_scoring[total_cash_at_risk])
-Cash Buried              = SUM(fct_risk_scoring[cash_buried])
-Margin at Risk           = SUM(fct_risk_scoring[margin_at_risk])
-Total Inventory Value    = SUM(fct_risk_scoring[inventory_value])
-Cash Buried % Inventory  = DIVIDE([Cash Buried], [Total Inventory Value])
-
-// Products with no demand have days_of_cover capped at 9999; exclude them to avoid distorting the average
-Weighted Days of Cover =
-VAR Active = FILTER(fct_risk_scoring, fct_risk_scoring[days_of_cover] < 9999)
-RETURN DIVIDE(
-    SUMX(Active, fct_risk_scoring[days_of_cover] * fct_risk_scoring[inventory_value]),
-    SUMX(Active, fct_risk_scoring[inventory_value])
-)
-
-Products Needing Order =
-CALCULATE(COUNTROWS(fct_risk_scoring),
-          fct_risk_scoring[risk_status] IN {"CRITICAL_STOCKOUT", "REORDER_NOW"})
-
-Order Value at Cost =
-SUMX(fct_risk_scoring, fct_risk_scoring[suggested_order_qty] * RELATED(dim_product[unit_cost]))
-
-Days to Deadline =
-DATEDIFF(MAX(fct_risk_scoring[as_of_date]), MAX(fct_risk_scoring[order_deadline_date]), DAY)
-
-Products Reorder Soon =
-CALCULATE(COUNTROWS(fct_risk_scoring), fct_risk_scoring[risk_status] = "REORDER_SOON")
-
-Critical A-class =
-CALCULATE(COUNTROWS(fct_risk_scoring), fct_risk_scoring[risk_status] = "CRITICAL_STOCKOUT")
-
-Products Overdue =
-VAR AsOf = MAX(fct_risk_scoring[as_of_date])
-RETURN CALCULATE(
-    COUNTROWS(fct_risk_scoring),
-    fct_risk_scoring[risk_status] IN {"CRITICAL_STOCKOUT", "REORDER_NOW"},
-    fct_risk_scoring[order_deadline_date] < AsOf
-)
-
 // Title of the stock-vs-ROP chart on page 2 (the reorder point in fct_stock_history is today's value, flat over 90 days)
 Fell Below ROP Label =
 VAR LastDay = MAX(fct_stock_history[day])
@@ -244,14 +206,6 @@ IF(NOT HASONEVALUE(fct_stock_history[product_id]),
       IF(ISBLANK(LastAbove),
          "Below ROP for the whole 90 days shown",
          "Fell below ROP on " & FORMAT(LastAbove + 1, "d mmm", "en-US"))))
-
-// Aging buckets (Age Buckets is a helper table with one column "Bucket": "<90 days", "90-180 days", ">180 days")
-Aged Stock Value =
-SWITCH(SELECTEDVALUE('Age Buckets'[Bucket]),
-    "<90 days",    SUMX(fct_risk_scoring, fct_risk_scoring[units_age_lt90]    * RELATED(dim_product[unit_cost])),
-    "90-180 days", SUMX(fct_risk_scoring, fct_risk_scoring[units_age_90_180]  * RELATED(dim_product[unit_cost])),
-    ">180 days",   SUMX(fct_risk_scoring, fct_risk_scoring[units_age_gt180]   * RELATED(dim_product[unit_cost]))
-)
 
 // Markdown what-if: [Markdown % Value] is generated by a Power BI "What-if" parameter (0 to 0.8, step 0.05, default 0.4)
 Dead Stock Book Value =
@@ -327,7 +281,7 @@ RETURN Line1 & " " & Line2 & Line3
         ▼
 [4. OpenAI module] ➔ 4-sentence executive briefing
         ▼
-[5. Slack #supply-chain]     [6. Email to Ops & Finance leads]
+[5. Email to Ops & Finance leads]     [6. Slack #supply-chain]
 ```
 
 Query for step 2:
@@ -348,7 +302,7 @@ Email table fields: `product_id`, `description`, `days_of_cover`, `margin_at_ris
 > If a `REORDER_SOON` product's order deadline has already passed on the day the email is sent, the email shows it as `REORDER_NOW` (overdue). The underlying tables and the Power BI dashboard are not changed, so the dashboard keeps the original `risk_status`.
 > In production, the data layer would be rebuilt on a daily schedule before the alert runs, and this guard would rarely trigger.
 
-The full run (trigger → Slack message and email arriving) is shown in the [demo video]({{FILL: YouTube URL}}).
+The full run (trigger → Slack message and email arriving) is shown in the [demo video](https://youtu.be/kZpnBolfdeQ).
 
 ---
 
@@ -358,17 +312,17 @@ Latest run (data as of 2026-11-01, the latest order in the dataset): 29,056 prod
 
 | Check | Result |
 |---|---|
-| Status mix | 27% `DEAD_STOCK` (7,738, no sale in the window) · 52% `SEVERE_OVERSTOCK` (15,241) · 18% `OVERSTOCK` (5,369) · 2% `HEALTHY` (684) · 19 products at or below their reorder point (7 `CRITICAL_STOCKOUT`, 12 `REORDER_NOW`) · 5 `REORDER_SOON` |
-| Cash buried | ≈ $8.16M, or 92.6% of the $8.80M inventory at cost |
-| Where the cash sits | About 93% of inventory value is cash buried in every distribution center (≈ $0.5M to $1.2M each, DC_3 highest), so the issue is portfolio-wide rather than local |
-| Margin at risk | ≈ $15.99 across the 19 products below their reorder point (normal approximation, expected shortage per replenishment cycle); ≈ $16 including the 5 `REORDER_SOON` products |
-| Reorder horizon | 5 products reach their reorder point within 14 days (the default), 6 within 30 and 24 within 60. 14 days is kept: it gives a short, actionable list, and 60 days is too far out to be a warning |
-| Dead stock break-even | Book value ≈ $1.82M against ≈ $3.8M at full price. Markdown breaks even only below ≈ 52%, and only if all dead stock sells; even with no markdown about 48% of units must sell. At 30% sell-through no markdown level recovers book value |
-| Poisson cross-check | On the products below their reorder point, margin at risk is ≈ $20 under a Poisson model vs ≈ $16 under the normal approximation: same order of magnitude, so the overstock-dominates conclusion does not depend on the model. The normal model gives roughly 2 to 3 times the Poisson stockout probability, so probabilities are used for ranking only. These products hold 1 to 2 units against an expected lead-time demand of 0.2 to 0.8 units |
-| Demand pattern | 73% `INTERMITTENT`, 27% `NO_DEMAND`, 0 `REGULAR`; every product falls in XYZ class Z |
-| Reconciliation | 180,746 inventory units marked sold = 180,746 order items (1:1 match); 27,077 of them belong to cancelled orders |
+| Status mix | 30.9% `DEAD_STOCK` (8,982, no sale in the window) · 52.8% `SEVERE_OVERSTOCK` (15,346) · 14.6% `OVERSTOCK` (4,228) · 1.7% `HEALTHY` (478) · 18 products at or below their reorder point (11 `CRITICAL_STOCKOUT`, 4 `REORDER_NOW`) · 3 `REORDER_SOON` |
+| Cash buried | ≈ $8.3M, or 94% of the $8.86M inventory at cost |
+| Where the cash sits | About 93.6% of inventory value is cash buried in every distribution center (≈ $0.5M to $1.2M each, DC_3 highest), so the issue is portfolio-wide rather than local |
+| Margin at risk | ≈ $30.96 across the 19 products below their reorder point (normal approximation, expected shortage per replenishment cycle), including the 5 `REORDER_SOON` products |
+| Reorder horizon | 3 products reach their reorder point within 14 days (the default), 8 within 21 and 24 within 60. 14 days is kept: it gives a short, actionable list, and 60 days is too far out to be a warning |
+| Dead stock break-even | Book value ≈ $2.2M against ≈ $4.6M at full price. Markdown breaks even only below ≈ 52%, and only if all dead stock sells; even with no markdown about 48% of units must sell. At 30% sell-through no markdown level recovers book value |
+| Poisson cross-check | On the products below their reorder point, margin at risk is ≈ $32.5 under a Poisson model vs ≈ $31 under the normal approximation: same order of magnitude, so the overstock-dominates conclusion does not depend on the model. The normal model gives roughly 2 to 3 times the Poisson stockout probability, so probabilities are used for ranking only. These products hold 1 to 2 units against an expected lead-time demand of 0.2 to 0.8 units |
+| Demand pattern | 69% `INTERMITTENT`, 31% `NO_DEMAND`, 0 `REGULAR`; every product falls in XYZ class Z |
+| Reconciliation | 181,798 inventory units marked sold = 181,798 order items (1:1 match); 27,311 of them belong to cancelled orders |
 
-**Reading the results.** On this shop the story is overstock, not stockout: stock far exceeds demand (median days of cover ≈ 3.5 years), so cash buried outweighs expected stockout losses by several orders of magnitude, and the actionable signal is *where* the cash sits (status tier, stock age, distribution center, category). Conventional 120/180-day thresholds put 99.8% of products in dead stock, so the tiers were recalibrated to this dataset. The stockout side is kept as a short watchlist: 19 products already at or below their reorder point (all past their order deadline) plus 5 about to reach it. Markdown alone does not solve dead stock; recovering book value needs roughly half the units to sell close to full price.
+**Reading the results.** On this shop the story is overstock, not stockout: stock far exceeds demand (median days of cover ≈ 3.5 years), so cash buried outweighs expected stockout losses by several orders of magnitude, and the actionable signal is *where* the cash sits (status tier, stock age, distribution center, category). Conventional 120/180-day thresholds put 99.8% of products in dead stock, so the tiers were recalibrated to this dataset. The stockout side is kept as a short watchlist: 18 products already at or below their reorder point (all past their order deadline) plus 3 about to reach it. Markdown alone does not solve dead stock; recovering book value needs roughly half the units to sell close to full price.
 
 ---
 
@@ -379,7 +333,7 @@ Latest run (data as of 2026-11-01, the latest order in the dataset): 29,056 prod
 - **Sparse demand.** No product has regular demand, so the normal approximation behind `stockout_probability` and `margin_at_risk` is weak. Treat both as ranking signals: a Poisson cross-check on the flagged products gives the same order of magnitude (see Key Findings), while Croston-type or count-based models would be the rigorous route. For the same reason every product lands in XYZ class Z.
 - **Reorder-soon horizon.** `days_until_rop` assumes constant projected demand. With intermittent demand a few units can move it by weeks, so the 14-day tier is a prioritisation signal, not a forecast.
 - **Markdown what-if.** Sell-through is a scenario assumption (no observed rate exists for products with no sales), and the model ignores selling and holding costs. Read the break-even figures as thresholds, not predictions.
-- **Stock definition.** `inventory_items.sold_at` is also set for cancelled orders (27,077 units), so on-hand stock is slightly understated. On-hand is a snapshot of the current dataset state; only `fct_stock_history` is point-in-time.
+- **Stock definition.** `inventory_items.sold_at` is also set for cancelled orders (27,311 units), so on-hand stock is slightly understated. On-hand is a snapshot of the current dataset state; only `fct_stock_history` is point-in-time.
 - **Scope and conventions.** Stock history covers the top 200 products over 90 days with today's reorder point as a flat line. ABC/XYZ cutoffs are conventions, and ABC uses a 180-day window.
 - **Snapshot vs alert date.** The public dataset is not updated daily, so  `as_of_date` lags the send date. The email applies a staleness guard (see section 6); the dashboard does not, so counts can differ slightly between the two.
 
@@ -423,4 +377,6 @@ That reproduces the full data layer. The dashboard and the alert workflow are do
 
 ---
 
-**Author:** Jade Le · [Portfolio](https://dataanalystjade.wordpress.com/) · [GitHub](https://github.com/jade1508) · [LinkedIn]({{FILL: LinkedIn URL}})
+**Author:** Jade Le · [Portfolio](https://dataanalystjade.wordpress.com/) · [GitHub](https://github.com/jade1508) · [LinkedIn]([{{FILL: LinkedIn URL}}](https://www.linkedin.com/in/jade-le/))
+
+#DataAnalytics #Statistics #SupplyChain #BigQuery #PowerBI #DataEngineering #Automation #OpenAIAPI
