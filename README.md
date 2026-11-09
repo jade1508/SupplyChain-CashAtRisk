@@ -2,7 +2,7 @@
 
 > **Most inventory dashboards tell you what already happened. This one shows where your cash is buried, which products to reorder, and by when.**
 
-▶️ **[Watch the demo (screen recording)]({(https://youtu.be/kZpnBolfdeQ)})**: the Power BI dashboard with live filters, and the Make.com workflow running end to end.
+▶️ **[Watch the demo (screen recording)]({{https://youtu.be/kZpnBolfdeQ}}})**: the Power BI dashboard with live filters, and the Make.com workflow running end to end.
 
 <img width="1443" height="806" alt="image" src="https://github.com/user-attachments/assets/bd6a6149-3698-4fe9-b60d-fe1508b987b8" />
 
