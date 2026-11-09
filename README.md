@@ -360,14 +360,14 @@ The full run (trigger → Slack message and email arriving) is shown in the [dem
 
 ## 7. Key Findings
 
-Latest run (data as of 2026-11-01, the latest order in the dataset): 29,056 products, 180-day demand window.
+Latest run (data as of 2026-11-01, the latest order in the dataset): 29,052 products, 180-day demand window.
 
 | Check | Result |
 |---|---|
-| Status mix | 30.9% `DEAD_STOCK` (8,982, no sale in the window) · 52.8% `SEVERE_OVERSTOCK` (15,346) · 14.6% `OVERSTOCK` (4,228) · 1.7% `HEALTHY` (478) · 18 products at or below their reorder point (11 `CRITICAL_STOCKOUT`, 4 `REORDER_NOW`) · 3 `REORDER_SOON` |
+| Status mix | 30.9% `DEAD_STOCK` (8,982, no sale in the window) · 52.8% `SEVERE_OVERSTOCK` (15,346) · 14.6% `OVERSTOCK` (4,228) · 1.7% `HEALTHY` (478) · 15 products at or below their reorder point (11 `CRITICAL_STOCKOUT`, 4 `REORDER_NOW`) · 3 `REORDER_SOON` |
 | Cash buried | ≈ $8.3M, or 94% of the $8.86M inventory at cost |
 | Where the cash sits | About 93.6% of inventory value is cash buried in every distribution center (≈ $0.5M to $1.2M each, DC_3 highest), so the issue is portfolio-wide rather than local |
-| Margin at risk | ≈ $30.96 across the 19 products below their reorder point (normal approximation, expected shortage per replenishment cycle), including the 5 `REORDER_SOON` products |
+| Margin at risk | ≈ $30.96 across the 18 products below their reorder point (normal approximation, expected shortage per replenishment cycle), including the 3 `REORDER_SOON` products |
 | Reorder horizon | 3 products reach their reorder point within 14 days (the default), 8 within 21 and 24 within 60. 14 days is kept: it gives a short, actionable list, and 60 days is too far out to be a warning |
 | Dead stock break-even | Book value ≈ $2.2M against ≈ $4.6M at full price. Markdown breaks even only below ≈ 52%, and only if all dead stock sells; even with no markdown about 48% of units must sell. At 30% sell-through no markdown level recovers book value |
 | Poisson cross-check | On the products below their reorder point, margin at risk is ≈ $32.5 under a Poisson model vs ≈ $31 under the normal approximation: same order of magnitude, so the overstock-dominates conclusion does not depend on the model. The normal model gives roughly 2 to 3 times the Poisson stockout probability, so probabilities are used for ranking only. These products hold 1 to 2 units against an expected lead-time demand of 0.2 to 0.8 units |
