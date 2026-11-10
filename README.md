@@ -298,14 +298,14 @@ WITH ranked AS (
          ROW_NUMBER() OVER (ORDER BY severity_rank, total_cash_at_risk DESC) AS rn
   FROM `inventory_risk_us.fct_risk_scoring`
   WHERE risk_status IN ('CRITICAL_STOCKOUT', 'REORDER_NOW', 'REORDER_SOON')
-),
-top25 AS (SELECT * FROM ranked WHERE rn <= 25),
-aggregated_data AS (
+  )
+, top25 AS (SELECT * FROM ranked WHERE rn <= 25)
+, aggregated_data AS (
   SELECT
-    ROUND(SUM(margin_at_risk), 2)                      AS total_margin_risk,
-    COUNTIF(display_status = 'CRITICAL_STOCKOUT')         AS critical_count,
-    COUNTIF(display_status = 'REORDER_NOW')               AS reorder_now_count,
-    COUNTIF(display_status = 'REORDER_SOON')              AS reorder_soon_count,
+    ROUND(SUM(margin_at_risk), 2) AS total_margin_risk,
+    COUNTIF(display_status = 'CRITICAL_STOCKOUT') AS critical_count,
+    COUNTIF(display_status = 'REORDER_NOW') AS reorder_now_count,
+    COUNTIF(display_status = 'REORDER_SOON') AS reorder_soon_count,
     STRING_AGG(
       CONCAT(
         '<tr>',
@@ -329,7 +329,7 @@ aggregated_data AS (
       '' ORDER BY rn
     ) AS html_table_rows
   FROM top25
-)
+  )
 SELECT 
   a.total_margin_risk,
   a.critical_count,
