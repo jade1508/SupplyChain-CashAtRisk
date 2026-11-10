@@ -2,7 +2,7 @@
 
 > **Most inventory dashboards tell you what already happened. This one shows where your cash is buried, which products to reorder, and by when.**
 
-▶️ **[Watch the demo (screen recording)](https://youtu.be/kZpnBolfdeQ)**: the Power BI dashboard with live filters, and the Make.com workflow running end to end.
+▶️ **[Watch the demo (screen recording)](https://youtu.be/aVF-JAhCj5A)**: the Power BI dashboard with live filters, and the Make.com workflow running end to end.
 
 <img width="1443" height="806" alt="image" src="https://github.com/user-attachments/assets/bd6a6149-3698-4fe9-b60d-fe1508b987b8" />
 
@@ -354,7 +354,7 @@ Email table fields: `product_id`, `description`, `days_of_cover`, `margin_at_ris
 > If a `REORDER_SOON` product's order deadline has already passed on the day the email is sent, the email shows it as `REORDER_NOW` (overdue). The underlying tables and the Power BI dashboard are not changed, so the dashboard keeps the original `risk_status`.
 > In production, the data layer would be rebuilt on a daily schedule before the alert runs, and this guard would rarely trigger.
 
-The full run (trigger → Slack message and email arriving) is shown in the [demo video](https://youtu.be/kZpnBolfdeQ).
+The full run (trigger → Slack message and email arriving) is shown in the [demo video](https://youtu.be/aVF-JAhCj5A).
 
 ---
 
