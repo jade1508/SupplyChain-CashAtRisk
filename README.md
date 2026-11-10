@@ -4,8 +4,7 @@
 
 ▶️ **[Watch the demo (screen recording)](https://youtu.be/aVF-JAhCj5A)**: the Power BI dashboard with live filters, and the Make.com workflow running end to end.
 
-<img width="1443" height="806" alt="image" src="https://github.com/user-attachments/assets/bd6a6149-3698-4fe9-b60d-fe1508b987b8" />
-
+<img width="1439" height="807" alt="PowerBI_Executive" src="https://github.com/user-attachments/assets/a0eef007-c0bf-41a8-bbdd-103b8c070cde" />
 
 **What it does**
 
@@ -146,7 +145,7 @@ These cutoffs are widely used **conventions, not universal standards**; sources 
 
 ### Screenshots
 
-<img width="1443" height="809" alt="image" src="https://github.com/user-attachments/assets/a27e551b-aac9-49a2-8bf5-5549694b5fa4" />
+<img width="1439" height="807" alt="PowerBI_Executive" src="https://github.com/user-attachments/assets/21fcad1d-c9ab-4bcd-8997-37983865f586" />
 <img width="1444" height="809" alt="image" src="https://github.com/user-attachments/assets/f6ec14d1-2c27-49c4-a615-a6f048cd8c2c" />
 <img width="1440" height="807" alt="image" src="https://github.com/user-attachments/assets/b4420378-ef5b-48d4-b445-3fe1135c6ee2" />
 
