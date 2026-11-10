@@ -72,7 +72,7 @@ Most operational dashboards stop at unit counts ("4 SKUs below reorder point"). 
    ┌────┴───────────────────────────────┐
    ▼                                    ▼
 📊 Power BI dashboard (3 pages)    ⚡ Make.com alert pipeline
-                                   (scheduled query ➔ AI summary ➔ Slack / email)
+                                   (scheduled query ➔ AI summary ➔ email / Slack)
 ```
 
 ---
