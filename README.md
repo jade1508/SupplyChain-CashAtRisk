@@ -397,15 +397,14 @@ Latest run (data as of 2026-11-01, the latest order in the dataset): 29,052 prod
 3. Run the queries in `sql/05_diagnostics.sql` and review the status mix.
 4. Run `sql/06_fct_stock_history.sql`.
 
-That reproduces the full data layer. The dashboard and the alert workflow are documented in sections 5 and 6 and shown in the demo video; the data model and DAX above are enough to rebuild the report in Power BI. Happy to walk through the Power BI file and the Make.com scenario live.
+That reproduces the full data layer. The dashboard and the alert workflow are documented in sections 5 and 6 and shown in the demo video; the data model and DAX above might be used to rebuild the report in Power BI. Happy to walk through the Power BI file and the Make.com scenario live.
 
 ### Repository structure
 
 ```text
 ├── README.md
 ├── sql/            # 00_params.sql ... 06_fct_stock_history.sql
-├── dashboard/      # screenshots / GIF
-└── docs/           # assumptions and sensitivity notes
+└── reports/        # screenshots / PNG
 ```
 
 ---
@@ -424,7 +423,7 @@ That reproduces the full data layer. The dashboard and the alert workflow are do
 - Logistic approximation of the cumulative normal (BigQuery has no built-in normal CDF): Bowling, Khasawneh, Kaewkuekool & Cho (2009), [A logistic approximation to the cumulative normal distribution](https://jiem.org/index.php/jiem/article/view/60), *Journal of Industrial Engineering and Management* 2(1), 114-127
 
 **Data**
-- Dataset: BigQuery public dataset `bigquery-public-data.thelook_ecommerce`
+- Dataset: BigQuery public dataset [`bigquery-public-data.thelook_ecommerce`](https://github.com/Chisomnwa/TheLook_Ecommerce_Analysis)
 
 ---
 
