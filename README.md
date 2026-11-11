@@ -427,6 +427,6 @@ That reproduces the full data layer. The dashboard and the alert workflow are do
 
 ---
 
-**Author:** Jade Le · [Portfolio](https://dataanalystjade.wordpress.com/) · [GitHub](https://github.com/jade1508) · [LinkedIn](https://www.linkedin.com/in/jade-le/))
+**Author:** Jade Le · [Portfolio](https://dataanalystjade.wordpress.com/) · [GitHub](https://github.com/jade1508) · [LinkedIn](https://www.linkedin.com/in/jade-le/)
 
 #DataAnalytics #DataStatistics #SupplyChain #BigQuery #PowerBI #Automation #OpenAIAPI
