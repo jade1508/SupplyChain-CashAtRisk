@@ -1,4 +1,5 @@
 # 📦 Supply Chain Inventory & Cash-at-Risk Early-Warning System
+Built on a synthetic public dataset to demonstrate the method
 
 > **Most inventory dashboards tell you what already happened. This one shows where your cash is buried, which products to reorder, and by when.**
 
